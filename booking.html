@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Computer Lab Booking System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+      <p>Fetching student data…</p>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-icon">
+        <img src="logo.png" alt="DMI Computer Education Logo">
+      </div>
+      <div>
+        <h1>Lab Booking System</h1>
+        <span>Institute Computer Lab Management</span>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="control-group">
+        <label for="datePicker">📅 Date</label>
+        <input type="date" id="datePicker" />
+      </div>
+      <div class="control-group">
+        <label for="branchSelector">🏢 Branch</label>
+        <select id="branchSelector">
+          <option value="jaffna">🏛️ Jaffna (Main Campus)</option>
+          <option value="chavakachcheri">🏫 Chavakachcheri</option>
+          <option value="chunnakam">🏢 Chunnakam</option>
+          <option value="nelliady">🌿 Nelliady</option>
+          <option value="sandilipay">🌅 Sandilipay</option>
+          <option value="kilinochchi">🏙️ Kilinochchi</option>
+        </select>
+      </div>
+      <div class="control-group barcode-group">
+        <label for="barcodeInput">🔍 Barcode / Student ID</label>
+        <div class="barcode-field">
+          <input type="text" id="barcodeInput" placeholder="Scan or type barcode…" autocomplete="off" />
+          <button id="barcodeBtn" onclick="handleBarcodeScan()">Go</button>
+        </div>
+      </div>
+      <div class="control-group name-search-group" style="position:relative;">
+        <label for="nameSearchInput">👤 Search by Name</label>
+        <div class="barcode-field">
+          <input type="text" id="nameSearchInput" placeholder="Type student name…" autocomplete="off"
+                 oninput="handleNameSearch()" onkeydown="handleNameKey(event)" />
+          <button onclick="clearNameSearch()">✕</button>
+        </div>
+        <div id="nameDropdown" class="name-dropdown hidden"></div>
+      </div>
+      <span id="studentCountBadge" class="student-count-badge" style="display:none"></span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Student Info Card -->
+    <section id="studentCard" class="student-card hidden">
+      <div class="student-card-header">
+        <div class="student-avatar" id="studentAvatar">A</div>
+        <div class="student-meta">
+          <h2 id="studentName">—</h2>
+          <p id="studentCourse">—</p>
+          <p id="studentSubModule" class="sub-module">—</p>
+        </div>
+        <div class="fee-badge-wrap">
+          <span id="feeBadge" class="fee-badge">—</span>
+          <div class="balance-box">
+            <span class="balance-label">Balance Due</span>
+            <span id="balanceAmount" class="balance-amount">RM 0.00</span>
+          </div>
+        </div>
+        <button class="clear-student-btn" onclick="clearStudent()" title="Clear student">✕</button>
+      </div>
+    </section>
+
+    <!-- Legend -->
+    <div class="legend-bar">
+      <div class="legend-item"><span class="legend-dot available"></span> Available</div>
+      <div class="legend-item"><span class="legend-dot booked"></span> Booked</div>
+      <div class="legend-item"><span class="legend-dot present"></span> Present ✅</div>
+      <div class="legend-item"><span class="legend-dot absent"></span> Absent ⛔</div>
+      <div class="legend-item"><span class="legend-dot blocked"></span> Blocked 🚫</div>
+      <div class="legend-tip">💡 Scan barcode on arrival to mark attendance · Click a free slot to Block it</div>
+    </div>
+
+    <!-- Grid Section -->
+    <section class="grid-section">
+      <div class="grid-scroll-wrap">
+        <table class="booking-grid" id="bookingGrid">
+          <thead id="gridHead"></thead>
+          <tbody id="gridBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Booking Modal -->
+  <div id="bookingModal" class="modal-overlay hidden" onclick="closeModalOnOverlay(event)">
+    <div class="modal-box" id="bookingModalBox">
+      <button class="modal-close" onclick="closeBookingModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">📋</div>
+        <h2>Confirm Booking</h2>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-row">
+          <span>🖥️ Computer</span>
+          <strong id="modalPC">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>🕐 Time Slot</span>
+          <strong id="modalSlot">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📅 Date</span>
+          <strong id="modalDate">—</strong>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-info-row">
+          <span>👤 Student</span>
+          <strong id="modalStudentName">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📚 Main Course</span>
+          <input id="modalStudentCourse" list="coursesList" class="modal-edit-input" autocomplete="off" placeholder="Type or pick">
+          <datalist id="coursesList"></datalist>
+        </div>
+        <div class="modal-info-row">
+          <span>📖 Sub-Module</span>
+          <input id="modalStudentModule" list="submodulesList" class="modal-edit-input" autocomplete="off" placeholder="Type or pick">
+          <datalist id="submodulesList"></datalist>
+        </div>
+        <div class="modal-info-row">
+          <span>💳 Fee Status</span>
+          <strong id="modalFeeStatus">—</strong>
+        </div>
+        <div id="modalFeeWarning" class="fee-warning hidden">
+          ⚠️ This student has an outstanding balance. Booking is still allowed but please notify the accounts team.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-action" onclick="closeBookingModal()">Cancel</button>
+        <button class="btn-confirm" onclick="confirmBooking()">✔ Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View/Cancel Modal -->
+  <div id="viewModal" class="modal-overlay hidden" onclick="closeViewModalOnOverlay(event)">
+    <div class="modal-box" id="viewModalBox">
+      <button class="modal-close" onclick="closeViewModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">🟢</div>
+        <h2>Booking Details</h2>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-row">
+          <span>🖥️ Computer</span>
+          <strong id="viewPC">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>🕐 Time Slot</span>
+          <strong id="viewSlot">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📅 Date</span>
+          <strong id="viewDate">—</strong>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-info-row">
+          <span>👤 Student</span>
+          <strong id="viewStudentName">—</strong>
+        </div>
+        <div class="modal-info-row" id="viewPhoneRow">
+          <span>📞 Phone</span>
+          <strong id="viewPhone">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📚 Course</span>
+          <strong id="viewStudentCourse">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📖 Sub-Module</span>
+          <strong id="viewStudentModule">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>💳 Fee Status</span>
+          <strong id="viewFeeStatus">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>⏰ Booked At</span>
+          <strong id="viewBookedAt">—</strong>
+        </div>
+        <div class="modal-info-row" id="viewArrivedAtRow">
+          <span>✅ Arrived At</span>
+          <strong id="viewArrivedAt">—</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-action" onclick="closeViewModal()">Close</button>
+        <a id="viewWhatsAppBtn" class="btn-whatsapp" target="_blank" rel="noopener" href="#" style="display:none">💬 WhatsApp</a>
+        <button class="btn-attend" id="viewMarkPresentBtn" onclick="markPresentFromView()">✅ Mark Present</button>
+        <button class="btn-delete" onclick="cancelBooking()">🗑 Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Modal -->
+  <div id="attendanceModal" class="modal-overlay hidden" onclick="closeAttendanceModalOnOverlay(event)">
+    <div class="modal-box" id="attendanceModalBox">
+      <button class="modal-close" onclick="closeAttendanceModal()">✕</button>
+      <div class="modal-header attend-header">
+        <div class="modal-icon">📍</div>
+        <h2>Mark Attendance</h2>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-row">
+          <span>👤 Student</span>
+          <strong id="attendStudentName">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📚 Course</span>
+          <strong id="attendStudentCourse">—</strong>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-info-row">
+          <span>🖥️ Computer</span>
+          <strong id="attendPC">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>🕐 Time Slot</span>
+          <strong id="attendSlot">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📅 Date</span>
+          <strong id="attendDate">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>⏰ Booked At</span>
+          <strong id="attendBookedAt">—</strong>
+        </div>
+        <div class="attend-note">
+          Student has arrived at the lab. Confirm to mark them as Present.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-action" onclick="closeAttendanceModal()">Not Now</button>
+        <button class="btn-attend" onclick="confirmAttendance()">✅ Mark Present</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block Prompt Modal (shown when clicking a free slot without a scanned student) -->
+  <div id="blockPromptModal" class="modal-overlay hidden" onclick="closeBlockPromptOnOverlay(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeBlockPromptModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">🚫</div>
+        <h2>Block this slot?</h2>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-row">
+          <span>🖥️ Computer</span>
+          <strong id="blockPromptPC">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>🕐 Time Slot</span>
+          <strong id="blockPromptSlot">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📅 Date</span>
+          <strong id="blockPromptDate">—</strong>
+        </div>
+        <div class="attend-note">
+          Blocking prevents bookings on this PC for this slot. You can unblock it later by clicking the same cell.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-action" onclick="closeBlockPromptModal()">Cancel</button>
+        <button class="btn-delete" onclick="confirmBlock()">🚫 Block Slot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Block Manage Modal (clicking an already-blocked cell) -->
+  <div id="blockManageModal" class="modal-overlay hidden" onclick="closeBlockManageOnOverlay(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeBlockManageModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">🚫</div>
+        <h2>Slot is blocked</h2>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info-row">
+          <span>🖥️ Computer</span>
+          <strong id="blockMgrPC">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>🕐 Time Slot</span>
+          <strong id="blockMgrSlot">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>📅 Date</span>
+          <strong id="blockMgrDate">—</strong>
+        </div>
+        <div class="modal-info-row">
+          <span>⏰ Blocked At</span>
+          <strong id="blockMgrBlockedAt">—</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-action" onclick="closeBlockManageModal()">Close</button>
+        <button class="btn-attend" onclick="confirmUnblock()">✅ Unblock</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

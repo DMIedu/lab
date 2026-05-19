@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DMI Computer Education – Lab Booking</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0c29;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-icon {
+      width: 52px; height: 52px;
+      background: transparent;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      box-shadow: none;
+    }
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .logo-text h1 {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #667eea, #f093fb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo-text p { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .live-badge {
+      background: rgba(16,185,129,0.2);
+      border: 1px solid rgba(16,185,129,0.4);
+      color: #10b981;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+    }
+    .hero h2 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .hero h2 span {
+      background: linear-gradient(90deg, #f093fb, #f5a623, #667eea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      max-width: 520px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* ── SEARCH BAR ── */
+    .search-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 50px;
+    }
+    .search-box {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 340px;
+    }
+    .search-box input {
+      background: none;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 14px;
+      width: 100%;
+    }
+    .search-box input::placeholder { color: rgba(255,255,255,0.4); }
+    .search-box span { color: rgba(255,255,255,0.4); font-size: 18px; }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 50px;
+      flex-wrap: wrap;
+      padding: 0 20px;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 16px 28px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .stat-pill .num {
+      font-size: 30px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #f093fb, #667eea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-pill .lbl { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
+    /* ── BRANCH GRID ── */
+    .section-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .branches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+
+    .branch-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .branch-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .card-top {
+      padding: 26px 26px 20px;
+      position: relative;
+    }
+    .branch-icon {
+      width: 54px; height: 54px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .card-glow {
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      opacity: 0.15;
+      filter: blur(40px);
+    }
+
+    .branch-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      position: relative; z-index: 1;
+    }
+    .branch-address {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      display: flex; align-items: center; gap: 5px;
+      position: relative; z-index: 1;
+    }
+
+    .card-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 0 26px;
+    }
+
+    .card-bottom {
+      padding: 18px 26px 22px;
+    }
+    .pc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .pc-count {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pc-count .icon { font-size: 18px; }
+    .pc-count .val {
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .pc-count .label { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+    .avail-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .avail-badge.green {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #10b981;
+    }
+    .avail-badge.amber {
+      background: rgba(245,166,35,0.15);
+      border: 1px solid rgba(245,166,35,0.3);
+      color: #f5a623;
+    }
+
+    /* PC dots */
+    .pc-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 18px;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 3px;
+    }
+    .dot.free { background: rgba(255,255,255,0.15); }
+    .dot.booked { background: rgba(239,68,68,0.6); }
+    .dot.blocked { background: rgba(107,114,128,0.5); }
+
+    .book-btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .book-btn:hover { opacity: 0.9; transform: scale(0.99); }
+    .book-btn:active { transform: scale(0.97); }
+
+    /* ── COLOUR THEMES ── */
+    .theme-purple .branch-icon { background: linear-gradient(135deg,#667eea,#764ba2); }
+    .theme-purple .card-glow   { background: #667eea; }
+    .theme-purple .pc-count .val { color: #a78bfa; }
+    .theme-purple .book-btn    { background: linear-gradient(135deg,#667eea,#764ba2); color:#fff; }
+
+    .theme-pink .branch-icon { background: linear-gradient(135deg,#f093fb,#f5576c); }
+    .theme-pink .card-glow   { background: #f093fb; }
+    .theme-pink .pc-count .val { color: #f9a8d4; }
+    .theme-pink .book-btn    { background: linear-gradient(135deg,#f093fb,#f5576c); color:#fff; }
+
+    .theme-blue .branch-icon { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+    .theme-blue .card-glow   { background: #4facfe; }
+    .theme-blue .pc-count .val { color: #7dd3fc; }
+    .theme-blue .book-btn    { background: linear-gradient(135deg,#4facfe,#00f2fe); color:#fff; }
+
+    .theme-green .branch-icon { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+    .theme-green .card-glow   { background: #43e97b; }
+    .theme-green .pc-count .val { color: #6ee7b7; }
+    .theme-green .book-btn    { background: linear-gradient(135deg,#43e97b,#38f9d7); color:#fff; }
+
+    .theme-orange .branch-icon { background: linear-gradient(135deg,#f5a623,#f7971e); }
+    .theme-orange .card-glow   { background: #f5a623; }
+    .theme-orange .pc-count .val { color: #fcd34d; }
+    .theme-orange .book-btn    { background: linear-gradient(135deg,#f5a623,#f7971e); color:#fff; }
+
+    .theme-red .branch-icon { background: linear-gradient(135deg,#ff6b6b,#ee0979); }
+    .theme-red .card-glow   { background: #ff6b6b; }
+    .theme-red .pc-count .val { color: #fca5a5; }
+    .theme-red .book-btn    { background: linear-gradient(135deg,#ff6b6b,#ee0979); color:#fff; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">
+      <img src="logo.png" alt="DMI Computer Education Logo">
+    </div>
+    <div class="logo-text">
+      <h1>DMI Computer Education</h1>
+      <p>Lab Booking Management System</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      System Live
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h2>Select Your <span>Branch</span></h2>
+  <p>Choose your campus below to book a computer lab session, view availability, or manage bookings.</p>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Search branch..." oninput="filterBranches()" />
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-pill">
+    <div class="num">6</div>
+    <div class="lbl">Branches</div>
+  </div>
+  <div class="stat-pill">
+    <div class="num">100</div>
+    <div class="lbl">Total PCs</div>
+  </div>
+  <div class="stat-pill">
+    <div class="num" id="totalAvail">–</div>
+    <div class="lbl">Available Now</div>
+  </div>
+</div>
+
+<div class="section-label">All Campus Locations</div>
+
+<!-- BRANCH CARDS -->
+<div class="branches-grid" id="branchGrid">
+
+  <!-- 1. Jaffna -->
+  <div class="branch-card theme-purple" data-branch="jaffna" data-pcs="25" onclick="openBranch('jaffna')">
+    <div class="card-top">
+      <div class="card-glow"></div>
+      <div class="branch-icon">🏛️</div>
+      <div class="branch-name">Jaffna – Main Campus</div>
+      <div class="branch-address">📍 Kannathiddy Road, Jaffna</div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-bottom">
+      <div class="pc-row">
+        <div class="pc-count">
+          <span class="icon">🖥️</span>
+          <div>
+            <div class="val">25</div>
+            <div class="label">Computers</div>
+          </div>
+        </div>
+        <span class="avail-badge green" id="badge-jaffna">Loading…</span>
+      </div>
+      <div class="pc-dots" id="dots-jaffna"></div>
+      <button class="book-btn">Book a PC →</button>
+    </div>
+  </div>
+
+  <!-- 2. Chavakachcheri -->
+  <div class="branch-card theme-pink" data-branch="chavakachcheri" data-pcs="10" onclick="openBranch('chavakachcheri')">
+    <div class="card-top">
+      <div class="card-glow"></div>
+      <div class="branch-icon">🏫</div>
+      <div class="branch-name">Chavakachcheri</div>
+      <div class="branch-address">📍 Kandy Road, Chavakachcheri</div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-bottom">
+      <div class="pc-row">
+        <div class="pc-count">
+          <span class="icon">🖥️</span>
+          <div>
+            <div class="val">10</div>
+            <div class="label">Computers</div>
+          </div>
+        </div>
+        <span class="avail-badge green" id="badge-chavakachcheri">Loading…</span>
+      </div>
+      <div class="pc-dots" id="dots-chavakachcheri"></div>
+      <button class="book-btn">Book a PC →</button>
+    </div>
+  </div>
+
+  <!-- 3. Chunnakam -->
+  <div class="branch-card theme-blue" data-branch="chunnakam" data-pcs="8" onclick="openBranch('chunnakam')">
+    <div class="card-top">
+      <div class="card-glow"></div>
+      <div class="branch-icon">🏢</div>
+      <div class="branch-name">Chunnakam</div>
+      <div class="branch-address">📍 K.K.S. Road, Chunnakam</div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-bottom">
+      <div class="pc-row">
+        <div class="pc-count">
+          <span class="icon">🖥️</span>
+          <div>
+            <div class="val">8</div>
+            <div class="label">Computers</div>
+          </div>
+        </div>
+        <span class="avail-badge green" id="badge-chunnakam">Loading…</span>
+      </div>
+      <div class="pc-dots" id="dots-chunnakam"></div>
+      <button class="book-btn">Book a PC →</button>
+    </div>
+  </div>
+
+  <!-- 4. Nelliady -->
+  <div class="branch-card theme-green" data-branch="nelliady" data-pcs="12" onclick="openBranch('nelliady')">
+    <div class="card-top">
+      <div class="card-glow"></div>
+      <div class="branch-icon">🌿</div>
+      <div class="branch-name">Nelliady</div>
+      <div class="branch-address">📍 M.M.V Road, Nelliady</div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-bottom">
+      <div class="pc-row">
+        <div class="pc-count">
+          <span class="icon">🖥️</span>
+          <div>
+            <div class="val">12</div>
+            <div class="label">Computers</div>
+          </div>
+        </div>
+        <span class="avail-badge green" id="badge-nelliady">Loading…</span>
+      </div>
+      <div class="pc-dots" id="dots-nelliady"></div>
+      <button class="book-btn">Book a PC →</button>
+    </div>
+  </div>
+
+  <!-- 5. Sandilipay -->
+  <div class="branch-card theme-orange" data-branch="sandilipay" data-pcs="8" onclick="openBranch('sandilipay')">
+    <div class="card-top">
+      <div class="card-glow"></div>
+      <div class="branch-icon">🌅</div>
+      <div class="branch-name">Sandilipay</div>
+      <div class="branch-address">📍 Sandilipay, Jaffna District</div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-bottom">
+      <div class="pc-row">
+        <div class="pc-count">
+          <span class="icon">🖥️</span>
+          <div>
+            <div class="val">8</div>
+            <div class="label">Computers</div>
+          </div>
+        </div>
+        <span class="avail-badge green" id="badge-sandilipay">Loading…</span>
+      </div>
+      <div class="pc-dots" id="dots-sandilipay"></div>
+      <button class="book-btn">Book a PC →</button>
+    </div>
+  </div>
+
+  <!-- 6. Kilinochchi -->
+  <div class="branch-card theme-red" data-branch="kilinochchi" data-pcs="10" onclick="openBranch('kilinochchi')">
+    <div class="card-top">
+      <div class="card-glow"></div>
+      <div class="branch-icon">🏙️</div>
+      <div class="branch-name">Kilinochchi</div>
+      <div class="branch-address">📍 A9 Road, Ananthapuram, Kilinochchi</div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="card-bottom">
+      <div class="pc-row">
+        <div class="pc-count">
+          <span class="icon">🖥️</span>
+          <div>
+            <div class="val">10</div>
+            <div class="label">Computers</div>
+          </div>
+        </div>
+        <span class="avail-badge green" id="badge-kilinochchi">Loading…</span>
+      </div>
+      <div class="pc-dots" id="dots-kilinochchi"></div>
+      <button class="book-btn">Book a PC →</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 DMI Computer Education · Northern Province, Sri Lanka · All rights reserved
+</footer>
+
+<script>
+  const BRANCHES = [
+    { id: 'jaffna',         pcs: 25 },
+    { id: 'chavakachcheri', pcs: 10 },
+    { id: 'chunnakam',      pcs:  8 },
+    { id: 'nelliady',       pcs: 12 },
+    { id: 'sandilipay',     pcs:  8 },
+    { id: 'kilinochchi',    pcs: 10 },
+  ];
+
+  // Simulate availability (replace with real API call if needed)
+  function initCards() {
+    let totalAvail = 0;
+    BRANCHES.forEach(b => {
+      const booked  = Math.floor(Math.random() * Math.floor(b.pcs * 0.4));
+      const blocked = Math.floor(Math.random() * 2);
+      const avail   = b.pcs - booked - blocked;
+      totalAvail += avail;
+
+      // Dots
+      const dotsEl = document.getElementById('dots-' + b.id);
+      for (let i = 0; i < b.pcs; i++) {
+        const d = document.createElement('div');
+        d.className = 'dot ' + (i < booked ? 'booked' : i < booked + blocked ? 'blocked' : 'free');
+        dotsEl.appendChild(d);
+      }
+
+      // Badge
+      const badge = document.getElementById('badge-' + b.id);
+      const pct   = Math.round((avail / b.pcs) * 100);
+      badge.textContent = avail + ' Available';
+      if (pct < 40) {
+        badge.classList.remove('green');
+        badge.classList.add('amber');
+      }
+    });
+    document.getElementById('totalAvail').textContent = totalAvail;
+  }
+
+  function openBranch(branchId) {
+    // Pass branch as URL param to booking system
+    window.location.href = 'booking.html?branch=' + branchId;
+  }
+
+  function filterBranches() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.branch-card').forEach(card => {
+      const name = card.querySelector('.branch-name').textContent.toLowerCase();
+      const addr = card.querySelector('.branch-address').textContent.toLowerCase();
+      card.style.display = (name.includes(q) || addr.includes(q)) ? '' : 'none';
+    });
+  }
+
+  initCards();
+</script>
+</body>
+</html>
